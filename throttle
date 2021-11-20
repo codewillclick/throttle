@@ -44,7 +44,7 @@ function throttle() (
 		# Break out if it's hit the limit.
 		[ ! -z "$TOTAL" ] && [ $COUNT -ge $TOTAL ] && \
 				break
-		# Wait for an entry in the fifo (unthrottle) if the stack is under the limit.
+		# Wait for an entry in the fifo (unthrottle) if the stack is at the limit.
 		[ $STACK -ge $LIMIT ] && {
 			read X < $FIFO
 			# Open up a slot.
