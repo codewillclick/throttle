@@ -1,0 +1,74 @@
+#!/bin/bash
+
+function fifoname() {
+	echo /tmp/throttle.$KEY
+}
+
+function unthrottle() (
+	KEY=$1
+	FIFO=$(fifoname)
+	shift
+	# Poke the fifo so it knows a slot opened up.
+	[ -e $FIFO ] && echo $@ >> $FIFO
+)
+
+function throttle() (
+	# Handle input arguments.
+	KEY=$1
+	let LIMIT=$2
+	let TOTAL=$3
+
+	[[ "$KEY" =~ ^[a-zA-Z0-9_-]+$ ]] || {
+		echo ERROR: Invalid key ["$KEY"] 1>&2
+		exit 1
+	}
+
+	# A couple globals.
+	FIFO=$(fifoname)
+
+	# Cleanup behavior.  Get rid of the fifo.
+	function clean() {
+		[ -e $FIFO ] && rm $FIFO
+	}
+	trap clean EXIT
+
+	# Make a fifo for this key of throttle.
+	[ -e $FIFO ] && rm $FIFO ; mkfifo $FIFO
+
+	COUNT=0
+	STACK=0
+	while true; do
+		# Break out if it's hit the limit.
+		[ ! -z "$TOTAL" ] && [ $COUNT -ge $TOTAL ] && \
+				break
+		# Wait for an entry in the fifo (unthrottle) if the stack is under the limit.
+		[ $STACK -ge $LIMIT ] && {
+			read X < $FIFO
+			# Open up a slot.
+			let STACK=($STACK-1)
+		}
+		# Read in the next line in 
+		{
+			read line || break
+			# Pass the line along.
+			echo $line
+			# Close a slot.
+			let STACK=($STACK+1)
+			let COUNT=($COUNT+1)
+		}
+	done
+)
+
+
+# I guess... go by the execution names, if it's being called as a script?
+
+[[ "$0" =~ unthrottle$ ]] && {
+	unthrottle $@
+	exit 0
+}
+
+[[ "$0" =~ throttle$ ]] && {
+	throttle $@
+	exit 0
+}
+
