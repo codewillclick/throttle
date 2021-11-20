@@ -17,7 +17,28 @@ done
 ```
 
 One may also leave out the total count.  The option was only added to allow a hard limit as a sanity check, anyway.  This way, it'll continue until it hits the end of the stream, when the `read` command fails.
+
 ```bash
 MAXCONCURRENT=10
 cat other_stream | throttle other_key $MAXCONCURRENT | ...
+```
+
+## Execution
+
+Additionally, the source is arranged to _be_ sourced.  It has its own throttle and unthrottle functions declared.  So it can be used as an executable script in the source path, with a symlink renamed to 'unthrottle', or sourced directly into another shell script.
+
+```bash
+cp throttle /usr/local/bin/
+ln -s /usr/local/bin/throttle /usr/local/bin/unthrottle
+```
+
+or...
+
+```bash
+(
+  . /path/to/throttle
+  cat thing | throttle key 5 | while read line; do
+    ( somesuch ; unthrottle key ) &
+  done
+)
 ```
