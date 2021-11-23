@@ -19,7 +19,7 @@ function throttle() (
 	# Handle input arguments.
 	KEY=$1
 	let LIMIT=$2
-	let TOTAL=$3
+	[ x$3 = x ] || let TOTAL=$3
 
 	[[ "$KEY" =~ ^[a-zA-Z0-9_.-]+$ ]] || {
 		echo ERROR: Invalid key ["$KEY"] 1>&2
