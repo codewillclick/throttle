@@ -52,9 +52,10 @@ function throttle() (
 		}
 		# Read in the next line in 
 		{
-			read line || break
+			# Force uninterpreted backslashes with read.
+			read -r line || break
 			# Pass the line along.
-			echo $line
+			echo "$line":
 			# Close a slot.
 			let STACK=($STACK+1)
 			let COUNT=($COUNT+1)
