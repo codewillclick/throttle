@@ -52,7 +52,7 @@ function throttle() (
 		}
 		# Read in the next line in 
 		{
-			# Force uninterpreted backslashes with read.
+			# Force uninterpreted backslashes with read -r.
 			read -r line || break
 			# Pass the line along.
 			echo "$line"
